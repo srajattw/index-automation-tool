@@ -15,6 +15,9 @@ import java.util.List;
 @Component
 public class IndexDao {
 
+    public static final String INDEX_DB = "IndexDB";
+    public static final String INDEX_CONFIG_COLLECTION = "IndexConfig";
+
     public MongoClient getMongoClient() throws UnknownHostException {
         MongoClient mongo = new MongoClient( "localhost" , 27017 );
         return mongo;
@@ -23,8 +26,17 @@ public class IndexDao {
     public void saveIndex(String indexJson) throws UnknownHostException {
         DBObject index = (DBObject) JSON.parse(indexJson);
         MongoClient mongo = getMongoClient();
-        DB db = mongo.getDB("IndexDB");
-        DBCollection collection = db.getCollection("IndexConfig");
+        DB db = mongo.getDB(INDEX_DB);
+        DBCollection collection = db.getCollection(INDEX_CONFIG_COLLECTION);
+        WriteResult writeResult = collection.insert(index);
+        System.out.print(writeResult.getN());
+    }
+
+    public void saveMethodologyDefinition(String methodologyDefinition) throws UnknownHostException {
+        DBObject index = (DBObject) JSON.parse(methodologyDefinition);
+        MongoClient mongo = getMongoClient();
+        DB db = mongo.getDB(INDEX_DB);
+        DBCollection collection = db.getCollection("MethodologyDefinition");
         WriteResult writeResult = collection.insert(index);
         System.out.print(writeResult.getN());
     }
@@ -32,8 +44,8 @@ public class IndexDao {
 
     public List<DBObject> fetchAllIndexConfig() throws UnknownHostException {
         MongoClient mongo = getMongoClient();
-        DB db = mongo.getDB("IndexDB");
-        DBCollection table = db.getCollection("IndexConfig");
+        DB db = mongo.getDB(INDEX_DB);
+        DBCollection table = db.getCollection(INDEX_CONFIG_COLLECTION);
         DBCursor cursor = table.find();
         List<DBObject> indexConfigs = new ArrayList<DBObject>();
         while (cursor.hasNext()) {

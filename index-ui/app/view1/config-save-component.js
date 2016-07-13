@@ -1,5 +1,5 @@
 angular.
-module('myApp').
+module('indexApp').
 component('greetUser', {
     template: 'Hello, {{$ctrl.user}}!',
     controller: function GreetUserController() {
