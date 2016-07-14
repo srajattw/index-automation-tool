@@ -1,9 +1,21 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-angular.module('indexApp',[])
-        .controller("IndexController", function($scope,$http) {
+var app = angular.module('indexApp',[]);
+
+
+app.controller("IndexController", function($scope,$http) {
                $scope.index = {};
+
+               $scope.inputs = [];
+
+                $scope.addfield = function () {
+                    $scope.inputs.push({})
+                }
+                $scope.getValue = function (item) {
+                    alert(item.value)
+                }
+
                $scope.submitForm = function(){
 
                      $http({
@@ -25,4 +37,6 @@ angular.module('indexApp',[])
                      })
 
                }
-             });
+             })
+
+
