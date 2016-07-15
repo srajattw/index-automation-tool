@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.UnknownHostException;
 
-//@CrossOrigin(origins = "http://localhost:63342")
+@CrossOrigin(origins = "http://localhost:63342")
 @RestController
 public class IndexController {
 

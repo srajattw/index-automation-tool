@@ -5,26 +5,27 @@ var app = angular.module('indexApp',[]);
 
 
 app.controller("IndexController", function($scope,$http) {
+
                $scope.index = {};
+               $scope.index.methodology = {}
+               $scope.index.methodology.attributes = []
 
-               $scope.inputs = [];
-
-                $scope.addfield = function () {
-                    $scope.inputs.push({})
-                }
-                $scope.getValue = function (item) {
-                    alert(item.value)
+                $scope.addMethodology = function () {
+                    $scope.index.methodology.attributes.push({})
                 }
 
-               $scope.submitForm = function(){
+                $scope.removeMethodology = function(m){
+                     var index = $scope.index.methodology.attributes.indexOf(m);
+                      $scope.index.methodology.attributes.splice(index, 1);
+                    }
+
+                $scope.submitForm = function(){
 
                      $http({
                          method : 'POST',
                          url : 'http://localhost:8080/saveIndexConfig',
                          data : $scope.index ,
                          headers : {'Content-Type':'application/json'}
-
-
 
                      })
 
