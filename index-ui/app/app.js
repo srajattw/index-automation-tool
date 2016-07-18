@@ -1,18 +1,31 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-angular.module('indexApp',[])
-        .controller("IndexController", function($scope,$http) {
+var app = angular.module('indexApp',[]);
+
+
+app.controller("IndexController", function($scope,$http) {
+
                $scope.index = {};
-               $scope.submitForm = function(){
+               $scope.index.methodology = {}
+               $scope.index.methodology.attributes = []
+
+                $scope.addMethodology = function () {
+                    $scope.index.methodology.attributes.push({})
+                }
+
+                $scope.removeMethodology = function(m){
+                     var index = $scope.index.methodology.attributes.indexOf(m);
+                      $scope.index.methodology.attributes.splice(index, 1);
+                    }
+
+                $scope.submitForm = function(){
 
                      $http({
                          method : 'POST',
                          url : 'http://localhost:8080/saveIndexConfig',
                          data : $scope.index ,
                          headers : {'Content-Type':'application/json'}
-
-
 
                      })
 
@@ -25,4 +38,6 @@ angular.module('indexApp',[])
                      })
 
                }
-             });
+             })
+
+

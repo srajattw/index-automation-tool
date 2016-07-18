@@ -33,7 +33,7 @@
     <div class="col-md-6 col-md-offset-3">
 
 
-      <form ng-submit="submitForm()">
+      <form ng-submit="submitForm()" class="navbar-form navbar-left" >
         <!-- NAME -->
 
 
@@ -41,14 +41,33 @@
           <label>Index Name</label>
           <input type="text" name="indexName" class="form-control" ng-model="index.indexName">
 
-        </div>
 
 
-        <div id="baseIndex" class="form-group">
           <label>Base Index</label>
           <input type="text" name="baseIndex" class="form-control" ng-model="index.baseIndex">
-        </div>
 
+
+
+          <div ng-repeat="ma in index.methodology.attributes">
+
+            <label>Name</label>
+            <input ng-model="ma.name" class="form-control"/>
+
+            <label>Type</label>
+            <input ng-model="ma.type" class="form-control"/>
+
+            <label>Value</label>
+            <input ng-model="ma.value" class="form-control"/>
+
+            <button ng-click="removeMethodology(ma)">Remove</button>
+
+          </div>
+          <button ng-click="addMethodology()">Add</button>
+
+          <lable>Calculator Code</lable>
+          <input type="text" name="calculator" class="form-control" ng-model="index.methodology.calculator">
+
+        </div>
 
 
         <!-- SUBMIT BUTTON -->
