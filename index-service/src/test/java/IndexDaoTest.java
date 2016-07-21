@@ -18,7 +18,6 @@ public class IndexDaoTest {
         IndexDao indexDao = new IndexDao();
         String indexJson = "{'indexName':'test','baseCurrency':'USD','baseIndex':100}";
         indexDao.saveIndex(indexJson);
-
     }
 
     @Test
@@ -29,6 +28,17 @@ public class IndexDaoTest {
         indexDao.saveIndex(indexJson);
 
         List<DBObject> indexConfigs = indexDao.fetchAllIndexConfig();
+        System.out.println(indexConfigs);
+        Assert.assertTrue(1<=indexConfigs.size());
+    }
+
+    @Test
+    public void shouldFetchAllMethodologies() throws UnknownHostException {
+
+        IndexDao indexDao = new IndexDao();
+
+        List<DBObject> indexConfigs = indexDao.fetchAllMethodologies();
+        System.out.println(indexConfigs);
         Assert.assertTrue(1<=indexConfigs.size());
     }
 }

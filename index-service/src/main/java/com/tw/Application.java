@@ -18,7 +18,22 @@ import org.springframework.context.annotation.ComponentScan;
 public class Application {
 
     public static void main(String[] args) {
+
+
         SpringApplication.run(Application.class, args);
+
+        /*StringBuffer counter = new StringBuffer();
+
+        IncrementFunction increment = () -> {
+            counter = new StringBuffer();
+            counter.append(1);
+        };
+
+        increment.increment();
+
+        increment.increment();
+
+        System.out.println(counter);*/
     }
 
 }
