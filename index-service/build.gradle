@@ -11,10 +11,11 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'groovy'
 
 jar {
     baseName = 'index-service'
-    version =  '0.1.0'
+    version = '0.1.0'
 }
 
 repositories {
@@ -27,7 +28,17 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.mongodb:mongo-java-driver:2.10.1")
+    compile 'org.codehaus.groovy:groovy-all:2.4.4'
+    compile 'org.json:json:20090211'
+    compile 'org.codehaus.groovy:groovy-json:2.4.4'
+
+
+    testCompile 'org.json:json:20090211'
+    testCompile "org.codehaus.groovy:groovy:2.4.4"
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile "org.mockito:mockito-core:1.+"
+    testCompile 'org.codehaus.groovy:groovy-json:2.4.4'
+
 }
 
 task wrapper(type: Wrapper) {

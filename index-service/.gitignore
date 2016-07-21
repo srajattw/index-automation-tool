@@ -25,4 +25,4 @@ gradle/
 gradlew
 #NDK
 obj/
-.idea*
+.idea/*
