@@ -34,15 +34,13 @@ public class IndexControllerTest {
   private String calculationScript = "import groovy.json.JsonBuilder\n" +
           "import groovy.json.JsonSlurper\n" +
           "\n" +
-          "String generateIndex(instruments, config) {\n" +
+          "double generateIndex(instruments, config) {\n" +
           "\n" +
           "    double indexCaluclated = 0\n" +
           "    for (instrument in instruments) {\n" +
           "        indexCaluclated = indexCaluclated + instrument.fixedCapitalization +config.baseValue" +
           "    }\n" +
-          "    def json = new JsonBuilder()\n" +
-          "    def root = json \"index\": indexCaluclated\n" +
-          "    return json.toString()\n" +
+          "    return indexCaluclated" +
           "}";
 
 
@@ -63,6 +61,7 @@ public class IndexControllerTest {
     builder.append("',");
     builder.append("},");
     builder.append("'baseValue':100");
+    builder.append(",'asOfDate':'2016-07-20'");
     builder.append("}");
     indexConfig = builder.toString();
 

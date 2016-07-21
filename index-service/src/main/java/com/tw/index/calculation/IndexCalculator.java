@@ -10,6 +10,6 @@ import java.util.List;
  */
 public interface IndexCalculator {
 
-  public String calculateIndex(List<DBObject> instruments, DBObject indexConfig) throws IOException;
+  public Double calculateIndex(List<DBObject> instruments, DBObject indexConfig) throws IOException;
 
 }

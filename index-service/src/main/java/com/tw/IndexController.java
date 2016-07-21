@@ -1,5 +1,6 @@
 package com.tw;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.tw.dao.mongo.IndexDao;
@@ -64,13 +65,17 @@ public class IndexController {
     String startDate = (String) requestObj.get("startDate");
     String endDate = (String) requestObj.get("endDate");
     String typeOfScript = (String) requestObj.get("typeOfScript");
+    String asOfDate = (String) requestObj.get("asOfDate");
 
     IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
     List<DBObject> instruments = indexDao.fetchAllInstruments();
 
-    String calculatedIndex = indexCalculator.calculateIndex(instruments, requestObj);
-    indexDao.saveCalculatedIndex(calculatedIndex);
-    return calculatedIndex;
+    Double calculatedIndex = indexCalculator.calculateIndex(instruments, requestObj);
+    BasicDBObject calculatedIndexJson = new BasicDBObject();
+    calculatedIndexJson.put("index", calculatedIndex);
+    calculatedIndexJson.put("asOfDate", asOfDate);
+    indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
+    return calculatedIndexJson.toString();
   }
 
 }
