@@ -1,6 +1,10 @@
 package com.tw;
 
+
 import com.mongodb.BasicDBList;
+
+import com.mongodb.BasicDBObject;
+
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.tw.dao.mongo.IndexDao;
@@ -63,7 +67,7 @@ public class IndexController {
 
 
   @RequestMapping(value = "/calculateIndices", method = RequestMethod.POST)
-  public String calculateIndices(@RequestBody String request) throws IOException {
+  public Boolean calculateIndices(@RequestBody String request) throws IOException {
 
 
     DBObject requestObj = (DBObject) JSON.parse(request);
@@ -71,18 +75,22 @@ public class IndexController {
     System.out.println(indexConfigJSON);
     String startDate = (String) requestObj.get("startDate");
     String endDate = (String) requestObj.get("endDate");
+    String asOfDate = (String) requestObj.get("asOfDate");
 
     String typeOfScript = "groovy";
-    String calculatedIndex = "";
+
     for(Object index  : indexConfigJSON) {
 
         IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
         List<DBObject> instruments = indexDao.fetchAllInstruments();
-
-        calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
-        indexDao.saveCalculatedIndex(calculatedIndex);
+        Double calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
+        BasicDBObject calculatedIndexJson = new BasicDBObject();
+        calculatedIndexJson.put("index", calculatedIndex);
+        calculatedIndexJson.put("asOfDate", asOfDate);
+        indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
     }
-    return calculatedIndex;
+    return true;
+
   }
 
 
