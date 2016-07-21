@@ -33,11 +33,13 @@ public class CsvReader {
                 // use comma as separator
                 String[] data = line.split("\t");
 
-                Map<String,String> map = new HashMap<String,String>();
+                Map<String,Object> map = new HashMap<String,Object>();
 
+                map.put("instrumentType","BSE_CORPORATIONS");
                 map.put("company",data[0]);
-                map.put("free_mkt_cap",data[1]);
-                map.put("fixed_mkt_cap",data[2]);
+
+                map.put("floatingCapitalization",Double.parseDouble(data[1]));
+                map.put("fixedCapitalization",Double.parseDouble(data[2]));
                 map.put("asof",parts[0]);
 
                 String json = JSONObject.toJSONString(map);

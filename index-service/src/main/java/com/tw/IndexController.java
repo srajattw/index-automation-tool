@@ -1,12 +1,19 @@
 package com.tw;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.tw.dao.mongo.IndexDao;
+
 import org.json.simple.JSONObject;
+
+import com.tw.index.calculation.IndexCalculator;
+import com.tw.index.calculation.IndexCalculatorFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -14,34 +21,35 @@ import java.util.List;
 @RestController
 public class IndexController {
 
-    public static String PING_REPLY = "reply from ping service";
+  public static String PING_REPLY = "reply from ping service";
 
-    @Autowired
-    protected IndexDao indexDao;
+  @Autowired
+  protected IndexDao indexDao;
 
-    @RequestMapping("/ping")
-    public String ping() {
-        return PING_REPLY;
+  @RequestMapping("/ping")
+  public String ping() {
+    return PING_REPLY;
+  }
+
+
+  @RequestMapping(value = "/saveIndexConfig", method = RequestMethod.POST)
+  public boolean saveIndex(@RequestBody String indexJson) {
+    boolean saved = true;
+
+    try {
+      indexDao.saveIndex(indexJson);
+    } catch (UnknownHostException e) {
+      saved = false;
+      e.printStackTrace();
     }
+    return saved;
+  }
 
 
-    @RequestMapping(value = "/saveIndexConfig",method = RequestMethod.POST)
-    public boolean saveIndex(@RequestBody String indexJson){
-        boolean saved = true;
+  @RequestMapping(value = "/saveMethodologyDefinition", method = RequestMethod.POST)
+  public boolean saveMethodologyDefinition(@RequestBody String methodologyDefinition) {
+    boolean saved = true;
 
-        try {
-            indexDao.saveIndex(indexJson);
-        } catch (UnknownHostException e) {
-            saved=false;
-            e.printStackTrace();
-        }
-        return saved;
-    }
-
-
-    @RequestMapping(value = "/saveMethodologyDefinition",method = RequestMethod.POST)
-    public boolean saveMethodologyDefinition(@RequestBody String methodologyDefinition){
-        boolean saved = true;
 
         try {
             System.out.println("methodology save request:"+methodologyDefinition);
@@ -51,7 +59,31 @@ public class IndexController {
             e.printStackTrace();
         }
         return saved;
+  }
+
+
+  @RequestMapping(value = "/calculateIndices", method = RequestMethod.POST)
+  public String calculateIndices(@RequestBody String request) throws IOException {
+
+
+    DBObject requestObj = (DBObject) JSON.parse(request);
+    BasicDBList indexConfigJSON = (BasicDBList) requestObj.get("indicesToCalculate");
+    System.out.println(indexConfigJSON);
+    String startDate = (String) requestObj.get("startDate");
+    String endDate = (String) requestObj.get("endDate");
+
+    String typeOfScript = "groovy";
+    String calculatedIndex = "";
+    for(Object index  : indexConfigJSON) {
+
+        IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
+        List<DBObject> instruments = indexDao.fetchAllInstruments();
+
+        calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
+        indexDao.saveCalculatedIndex(calculatedIndex);
     }
+    return calculatedIndex;
+  }
 
 
     @CrossOrigin(origins = "http://localhost:63342")
@@ -80,20 +112,5 @@ public class IndexController {
         return indexConfigs;
     }
 
-
-
-    @CrossOrigin(origins = "http://localhost:63342")
-    @RequestMapping(value = "/calculateIndices",method = RequestMethod.POST)
-    public Boolean calculateIndices(@RequestBody String request){
-
-        DBObject requestObj = (DBObject)JSON.parse(request);
-        System.out.println(request);
-        System.out.println(requestObj.get("indicesToCalculate"));
-        System.out.println(requestObj.get("startDate"));
-        System.out.println(requestObj.get("endDate"));
-
-
-        return true;
-    }
 }
 
