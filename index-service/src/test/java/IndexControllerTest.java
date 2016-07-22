@@ -31,16 +31,13 @@ public class IndexControllerTest {
 
   private String baseUrl = "http://localhost:" + port + "/";
   private String indexConfig;
-  private String calculationScript = "import groovy.json.JsonBuilder\n" +
-          "import groovy.json.JsonSlurper\n" +
-          "\n" +
-          "double generateIndex(instruments, config) {\n" +
-          "\n" +
-          "    double indexCaluclated = 0\n" +
+  private String calculationScript = "double generateIndex(instruments, config) {\n" +
+          "    double totalMarketCapitalization = 0\n" +
           "    for (instrument in instruments) {\n" +
-          "        indexCaluclated = indexCaluclated + instrument.fixedCapitalization +config.baseValue" +
+          "        totalMarketCapitalization = totalMarketCapitalization + instrument.floatingCapitalization\n" +
           "    }\n" +
-          "    return indexCaluclated" +
+          "    double indexCalculated = totalMarketCapitalization * config.baseIndex / config.baseCapitalization\n" +
+          "    return indexCalculated\n" +
           "}";
 
 
@@ -60,7 +57,8 @@ public class IndexControllerTest {
     builder.append(calculationScript);
     builder.append("',");
     builder.append("},");
-    builder.append("'baseValue':100");
+    builder.append("'baseIndex':100");
+    builder.append(",'baseCapitalization':300");
     builder.append(",'asOfDate':'2016-07-20'");
     builder.append("}");
     indexConfig = builder.toString();
