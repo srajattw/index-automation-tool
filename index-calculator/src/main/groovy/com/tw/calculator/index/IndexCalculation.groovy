@@ -13,7 +13,7 @@ double generateIndex(instruments, config) {
     for (instrument in instruments) {
         totalMarketCapitalization = totalMarketCapitalization + instrument.floatingCapitalization
     }
-    double indexCalculated = totalMarketCapitalization * config.baseIndex / config.baseCapitalization
+    double indexCalculated = totalMarketCapitalization * config.baseIndex / config.baseIndexLevel
     return indexCalculated
 }
 

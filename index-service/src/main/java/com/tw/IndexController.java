@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:63342")
@@ -67,7 +72,7 @@ public class IndexController {
 
 
   @RequestMapping(value = "/calculateIndices", method = RequestMethod.POST)
-  public Boolean calculateIndices(@RequestBody String request) throws IOException {
+  public  List<DBObject> calculateIndices(@RequestBody String request) throws IOException {
 
 
     DBObject requestObj = (DBObject) JSON.parse(request);
@@ -75,21 +80,64 @@ public class IndexController {
     System.out.println(indexConfigJSON);
     String startDate = (String) requestObj.get("startDate");
     String endDate = (String) requestObj.get("endDate");
-    String asOfDate = (String) requestObj.get("asOfDate");
 
     String typeOfScript = "groovy";
 
-    for(Object index  : indexConfigJSON) {
+    SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd");
 
-        IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
-        List<DBObject> instruments = indexDao.fetchAllInstruments();
-        Double calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
-        BasicDBObject calculatedIndexJson = new BasicDBObject();
-        calculatedIndexJson.put("index", calculatedIndex);
-        calculatedIndexJson.put("asOfDate", asOfDate);
-        indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
+      List<DBObject> result = new ArrayList<>();
+
+      Date startDateObj = null;
+      Date endDateObj = null;
+      Calendar c = Calendar.getInstance();
+      try {
+
+          startDateObj = sdf.parse(startDate);
+          endDateObj = sdf.parse(endDate);
+
+
+          c.setTime(startDateObj);
+      } catch (ParseException e) {
+          e.printStackTrace();
+      }
+
+
+    for(Date d = startDateObj ; (d.compareTo(endDateObj)<=0);) {
+
+        for (Object index : indexConfigJSON) {
+
+            IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
+            List<DBObject> instruments = indexDao.fetchAllInstruments();
+            BasicDBObject calculatedIndexJson = new BasicDBObject();
+            calculatedIndexJson.put("indexCode", ((DBObject) index).get("indexCode"));
+
+            calculatedIndexJson.put("asOfDate", sdf.format(d));
+            calculatedIndexJson.put("calcStartDate", sdf.format(new Date()));
+
+            try {
+                Double calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
+                calculatedIndexJson.put("indexValue", calculatedIndex);
+                calculatedIndexJson.put("status", "Success");
+
+
+                indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
+
+            }catch (Exception e){
+                e.printStackTrace();
+                calculatedIndexJson.put("status", "Failure");
+                calculatedIndexJson.put("errorMessage", e.getMessage());
+            }
+
+            result.add(calculatedIndexJson);
+
+        }
+
+        c.add(Calendar.DATE,1);
+        d = c.getTime();
+
     }
-    return true;
+
+    return result;
 
   }
 
