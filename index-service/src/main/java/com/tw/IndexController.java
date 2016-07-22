@@ -60,19 +60,19 @@ public class IndexController {
     boolean saved = true;
 
 
-        try {
-            System.out.println("methodology save request:"+methodologyDefinition);
-            indexDao.saveMethodologyDefinition(methodologyDefinition);
-        } catch (UnknownHostException e) {
-            saved=false;
-            e.printStackTrace();
-        }
-        return saved;
+    try {
+      System.out.println("methodology save request:" + methodologyDefinition);
+      indexDao.saveMethodologyDefinition(methodologyDefinition);
+    } catch (UnknownHostException e) {
+      saved = false;
+      e.printStackTrace();
+    }
+    return saved;
   }
 
 
   @RequestMapping(value = "/calculateIndices", method = RequestMethod.POST)
-  public  List<DBObject> calculateIndices(@RequestBody String request) throws IOException {
+  public List<DBObject> calculateIndices(@RequestBody String request) throws IOException {
 
 
     DBObject requestObj = (DBObject) JSON.parse(request);
@@ -83,57 +83,58 @@ public class IndexController {
 
     String typeOfScript = "groovy";
 
-    SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-      List<DBObject> result = new ArrayList<>();
+    List<DBObject> result = new ArrayList<>();
 
-      Date startDateObj = null;
-      Date endDateObj = null;
-      Calendar c = Calendar.getInstance();
-      try {
+    Date startDateObj = null;
+    Date endDateObj = null;
+    Calendar c = Calendar.getInstance();
+    try {
 
-          startDateObj = sdf.parse(startDate);
-          endDateObj = sdf.parse(endDate);
+      startDateObj = sdf.parse(startDate);
+      endDateObj = sdf.parse(endDate);
 
 
-          c.setTime(startDateObj);
-      } catch (ParseException e) {
+      c.setTime(startDateObj);
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+
+
+    for (Date d = startDateObj; (d.compareTo(endDateObj) <= 0); ) {
+
+      for (Object index : indexConfigJSON) {
+
+        IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
+        BasicDBObject calculatedIndexJson = new BasicDBObject();
+        calculatedIndexJson.put("indexCode", ((DBObject) index).get("indexCode"));
+
+        calculatedIndexJson.put("asOfDate", sdf.format(d));
+        List<DBObject> instruments = indexDao.fetchAllInstrumentsForAsOfDate(sdf.format(d));
+
+        calculatedIndexJson.put("calcStartDate", sdf.format(new Date()));
+
+        try {
+          Double calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
+          calculatedIndexJson.put("indexValue", calculatedIndex);
+          calculatedIndexJson.put("status", "Success");
+
+
+          indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
+
+        } catch (Exception e) {
           e.printStackTrace();
-      }
-
-
-    for(Date d = startDateObj ; (d.compareTo(endDateObj)<=0);) {
-
-        for (Object index : indexConfigJSON) {
-
-            IndexCalculator indexCalculator = IndexCalculatorFactory.getIndexCalculator(typeOfScript);
-            List<DBObject> instruments = indexDao.fetchAllInstruments();
-            BasicDBObject calculatedIndexJson = new BasicDBObject();
-            calculatedIndexJson.put("indexCode", ((DBObject) index).get("indexCode"));
-
-            calculatedIndexJson.put("asOfDate", sdf.format(d));
-            calculatedIndexJson.put("calcStartDate", sdf.format(new Date()));
-
-            try {
-                Double calculatedIndex = indexCalculator.calculateIndex(instruments, (DBObject) index);
-                calculatedIndexJson.put("indexValue", calculatedIndex);
-                calculatedIndexJson.put("status", "Success");
-
-
-                indexDao.saveCalculatedIndex(calculatedIndexJson.toString());
-
-            }catch (Exception e){
-                e.printStackTrace();
-                calculatedIndexJson.put("status", "Failure");
-                calculatedIndexJson.put("errorMessage", e.getMessage());
-            }
-
-            result.add(calculatedIndexJson);
-
+          calculatedIndexJson.put("status", "Failure");
+          calculatedIndexJson.put("errorMessage", e.getMessage());
         }
 
-        c.add(Calendar.DATE,1);
-        d = c.getTime();
+        result.add(calculatedIndexJson);
+
+      }
+
+      c.add(Calendar.DATE, 1);
+      d = c.getTime();
 
     }
 
@@ -142,31 +143,31 @@ public class IndexController {
   }
 
 
-    @CrossOrigin(origins = "http://localhost:63342")
-    @RequestMapping(value = "/getMethodologies",method = RequestMethod.GET)
-    public List fetchMethodlogies(){
-        List methodlogies = null;
+  @CrossOrigin(origins = "http://localhost:63342")
+  @RequestMapping(value = "/getMethodologies", method = RequestMethod.GET)
+  public List fetchMethodlogies() {
+    List methodlogies = null;
 
-        try {
-             methodlogies = indexDao.fetchAllMethodologies();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return methodlogies;
+    try {
+      methodlogies = indexDao.fetchAllMethodologies();
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
     }
+    return methodlogies;
+  }
 
-    @CrossOrigin(origins = "http://localhost:63342")
-    @RequestMapping(value = "/searchIndices",method = RequestMethod.GET)
-    public List fetchIndices(){
-        List indexConfigs = null;
+  @CrossOrigin(origins = "http://localhost:63342")
+  @RequestMapping(value = "/searchIndices", method = RequestMethod.GET)
+  public List fetchIndices() {
+    List indexConfigs = null;
 
-        try {
-            indexConfigs = indexDao.fetchAllIndexConfig();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return indexConfigs;
+    try {
+      indexConfigs = indexDao.fetchAllIndexConfig();
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
     }
+    return indexConfigs;
+  }
 
 }
 
